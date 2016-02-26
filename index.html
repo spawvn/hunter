@@ -1,0 +1,616 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>Hunter Game</title>
+		
+	<style>
+		div{
+			overflow:hidden;
+		}
+		
+		body{
+			background-color:#fcfcfc;
+		}
+	</style>
+	
+	<script type="text/javascript">
+		
+		//Copyright: Spawn Productions 2008
+		
+		function newObj(type, top, left, width, height, back){
+			var obj = document.createElement(type)
+			main.appendChild (obj)
+			obj.style.position = "absolute"
+			obj.style.top = top + "px"
+			obj.style.left = left + "px"
+			obj.style.width = width + "px"
+			obj.style.height = height + "px"
+			obj.style.background = back
+			return obj
+		}
+		
+		function rand(from, to){
+			to++
+			var rand = parseInt(Math.random()*(to-from) + from)
+			return rand
+		}
+		
+		function cloud(){
+			this.div = this.createDiv()
+		}
+		cloud.prototype.createDiv = function(){
+			return document.createElement("div")
+		}
+		cloud.prototype.addDiv = function(){
+			this.div.style.background = "url(cloud"+rand(1, 3)+".png)"
+			this.div.style.width = "166px"
+			this.div.style.height = "71px"
+			this.div.style.position = "absolute"
+			this.div.style.top = rand(10, 150) + "px"
+			this.div.style.left = main.offsetWidth+ "px"
+			return main.appendChild(this.div)
+		}
+		cloud.prototype.fly = function(){
+			var _this = this;
+			function go()
+			{
+				_this.div.style.left = parseInt(_this.div.style.left) - 1 + "px"
+				if (_this.div.offsetLeft < 0 - _this.div.offsetWidth){
+					_this.div.style.left = main.offsetWidth+ "px"
+					_this.div.style.top = rand(10, 150) + "px"
+				}
+			}
+			_this.go = setInterval(go,25)
+		}
+		
+		
+		cl_number = 0
+		function g_clouds(){
+			if (cl_number <3){
+				var cl1 = new cloud
+				cl1.addDiv()
+				cl1.fly()
+				cl_number++
+			} else {
+				clearInterval(clouds_gen)
+			}
+		}
+			function g_bunnies(){
+				bn1 = new bullet();
+				var b_type_n = rand(0, 2)
+				//b_type_n=2//only hhogs
+				if(b_type_n == 0 || b_type_n==1){
+					b_type = "bunny"
+				}
+				if(b_type_n == 2){
+					b_type = "hhog"
+				}
+				var right = rand(0, 1)
+				if (b_type == "bunny"){
+					bn1.div.b_type = "bunny"
+					if (right==1){
+						bn1.addDiv("url(bunny.png)", 60, 76, main.offsetHeight - 76 - 15, main.offsetWidth, bunnies)
+						bn1.run(true)
+					} else {
+						bn1.addDiv("url(bunny.png)", 60, 76, main.offsetHeight - 76 - 15, - 50, bunnies)
+						bn1.run(false)
+					}
+				}
+				if (b_type == "hhog") {
+					bn1.div.b_type = "hhog"
+					if (right==1){
+						bn1.addDiv("url(hhog.png)", 60, 47, main.offsetHeight - 47 - 15, main.offsetWidth, bunnies)
+						bn1.run(true)
+					} else {
+						bn1.addDiv("url(hhog.png)", 60, 47, main.offsetHeight - 47 - 15, - 50, bunnies)
+						bn1.run(false)
+					}
+				}
+				b_number++
+				if (b_number==10){
+					b_speed = 10
+				}
+				if(b_number==20){
+					b_speed = 15
+				}
+			}
+		
+		function bullet (){
+			this.div = this.createDiv()
+		}
+		bullet.prototype.createDiv = function(){
+			return document.createElement("div")
+		}
+		bullet.prototype.addDiv = function(color, p_width, p_height, p_top, p_left, place){
+			this.div.style.background = color
+			this.div.style.width = p_width + "px"
+			this.div.style.height = p_height + "px"
+			this.div.style.position = "absolute"
+			this.div.style.top = p_top + "px"
+			this.div.style.left = p_left + "px"
+			return place.appendChild(this.div)
+		}
+		bullet.prototype.fly = function(){
+			var _this = this;
+			if (char.turn){
+				_this.turn = true
+			} else {
+				_this.turn = false
+			}
+			function go()
+			{
+				if(_this.turn){
+					_this.div.style.left = parseInt(_this.div.style.left) + 3 + "px"
+					if(_this.div.offsetLeft > main.offsetWidth){
+						clearInterval(_this.go)
+						bullets.removeChild(_this.div)
+					}
+				} else {
+					_this.div.style.left = parseInt(_this.div.style.left) - 3 + "px"
+					if(_this.div.offsetLeft < - (_this.div.offsetWidth)){
+						clearInterval(_this.go)
+						bullets.removeChild(_this.div)
+					}
+				}
+				
+			}
+			_this.div.go = setInterval(go,1)
+		}
+		b_speed = 5
+		b_number = 0
+		bullet.prototype.run = function(t_right){
+			var up = true
+			var b_count = 0
+			var _this = this
+			this.div.dead = false
+			if (t_right){
+				this.div.t_right = true
+				_this.right = false
+				if(_this.div.b_type == "bunny"){
+					_this.div.style.backgroundPosition = "0 -76px"
+				}
+				if(_this.div.b_type == "hhog") {
+					_this.div.style.backgroundPosition = "0 -47px"
+				}
+			} else {
+				_this.right = true
+				this.div.t_right = false
+			}
+			function go()
+			{
+				if(_this.right){
+					_this.div.style.left = parseInt(_this.div.style.left) + b_speed + "px"
+					_this.div.style.backgroundPosition = -60*b_count + "px 0"
+					if (up){
+						b_count++
+						if(b_count == 3){
+							up = false
+						}
+					} else {
+						b_count--
+						if(b_count == 0){
+							up = true
+						}
+					}
+					if(_this.div.offsetLeft > main.offsetWidth){
+						clearInterval(_this.go)
+						bunnies.removeChild(_this.div)
+					}
+				} else {
+					_this.div.style.left = parseInt(_this.div.style.left) - b_speed + "px"
+					if(_this.div.b_type == "bunny"){
+						_this.div.style.backgroundPosition = -60*b_count + "px -76px"
+					}
+					if(_this.div.b_type == "hhog") {
+						_this.div.style.backgroundPosition = -60*b_count + "px -47px"
+					}
+					if (up){
+						b_count++
+						if(b_count == 3){
+							up = false
+						}
+					} else {
+						b_count--
+						if(b_count == 0){
+							up = true
+						}
+					}
+					if(_this.div.offsetLeft < - (_this.div.offsetWidth)){
+						clearInterval(_this.go)
+						bunnies.removeChild(_this.div)
+					}
+				}
+				if (_this.div.b_type == "hhog") {
+					if (_this.div.offsetLeft+_this.div.offsetWidth > char.offsetLeft+10 && _this.div.offsetLeft < char.offsetLeft+char.offsetWidth-10 && !char.jumped && !char.dead){
+					
+						clearInterval(char.l_intrv)
+						clearInterval(char.r_intrv)
+						clearInterval(char.l_step)
+						clearInterval(char.r_step)
+						
+						char.dead = true
+						
+						if (char.turn) {
+							char.style.backgroundPosition = "-375px 0"
+						}
+						else {
+							char.style.backgroundPosition = "-375px -90px"
+						}
+						
+						if(lifes == 0){
+							char.r = 250
+							clearInterval(bunny_gen)
+							clearInterval(hit_test_intrv)
+							
+							lose = newObj("span")
+							lose.style.width = "100%"
+							lose.style.textAlign = "center"
+							lose.style.position = "absolute"
+							lose.style.top = main.offsetHeight/2 - 25 + "px"
+							lose.style.fontSize = "32px"
+							lose.style.fontWeight = "bold"
+							lose.innerHTML = "Game Over!"
+							
+							lose = newObj("span")
+							lose.style.width = "100%"
+							lose.style.textAlign = "center"
+							lose.style.position = "absolute"
+							lose.style.top = main.offsetHeight/2 + 10 + "px"
+							lose.style.fontSize = "20px"
+							lose.style.fontWeight = "bold"
+							lose.innerHTML = "(Hit F5 to restart)"
+							
+							if(_this.right){
+								char.d_intrv = setInterval(function(){
+									char.die(3)
+								}, 10)
+							} else {
+								char.d_intrv = setInterval(function(){
+									char.die(-3)
+								}, 10)
+							}
+						} else {
+							if(_this.right){
+								char.j_intrv = setInterval(function(){
+									char.jump(3)
+								}, 10)
+							} else {
+								char.j_intrv = setInterval(function(){
+									char.jump(-3)
+								}, 10)
+							}
+							d_lifes.removeChild(d_lifes.childNodes[0])
+							lifes--
+						}
+					}
+				}
+			}
+			_this.div.go = setInterval(go,75)
+		}
+		
+		function main_gen(){
+			main = document.createElement("div")
+			document.body.appendChild(main)
+			main.style.position = "absolute"
+			main.style.top = "25px"
+			main.style.left = "25px"
+			main.style.width = "600px"
+			main.style.height = "400px"
+			main.style.background = "#DFFDFD"
+			main.style.backgroundImage="url(grass.gif)"
+			main.style.backgroundRepeat="no-repeat"
+			main.style.backgroundPosition = "0px " + (main.offsetHeight - 89) + "px"
+			main.style.border = "1px solid #AAA"
+			
+			b_start = button("Start", 80, 150, (main.offsetWidth/2) - 40)
+			b_info = button("Help", 80, 180, (main.offsetWidth/2) - 40)
+			
+			b_start.onclick = function(){
+				if(tutor_generated){
+					document.body.removeChild(tutor)
+				}
+				main.removeChild(b_start)
+				main.removeChild(b_info)
+				init()
+				bunny_gen = setInterval(g_bunnies, 3500)
+				hit_test_intrv = setInterval(hit_test, 1)
+			}
+			
+			tutor_generated = false
+			b_info.onclick = function(){
+				tutor_gen()
+				tutor_generated = true
+			}
+		}
+		
+		function tutor_gen(){
+			if (!tutor_generated){
+				tutor = document.createElement("div")
+				document.body.appendChild (tutor)
+				tutor.style.position = "absolute"
+				tutor.style.top = "450px"
+				tutor.style.left = "25px"
+				tutor.style.width = "580px"
+				tutor.style.height = "50px"
+				tutor.style.background = "#fff"
+				tutor.style.border = "1px solid #AAA"
+				tutor.style.textAlign = "center"
+				tutor.style.padding = "10px"
+				tutor.innerHTML = "Movement: use arrows left and right. Jump: arrow up. Shoot: spacebar.</br>Shoot the hares, earn points, and avoid hedgehogs - you can't kill them."
+			}
+		}
+		
+		function button(name, width, top, left){
+			var obj = document.createElement("input")
+			obj.type = "button"
+			obj.value = name
+			obj.style.width = width + "px"
+			obj.style.position = "absolute"
+			obj.style.top = top + "px"
+			obj.style.left = left + "px"
+			obj.style.zIndex = 1100
+			main.appendChild(obj)
+			return obj
+		}
+		
+		function init(){
+			lifes = 3
+		
+			d_lifes = document.createElement("div")
+			main.appendChild(d_lifes)
+			for(var i=0; i<3; i++){
+				var obj = newObj ("div", 15, 20*i+530, 10, 10, "url(life.png)")
+				d_lifes.appendChild(obj)
+			}
+		
+			bullets = document.createElement("div")
+			main.appendChild(bullets)
+			
+			bunnies = document.createElement("div")
+			main.appendChild(bunnies)
+			
+			info = newObj("div")
+			info.style.position = "absolute"
+			
+			score = newObj("div")
+			score.style.position = "absolute"
+			score.style.top = "5px"
+			score.style.left = "10px"
+			score.style.fontSize = "21px"
+			score.style.fontWeight = "bold"
+			score.innerHTML = "Score: 0"
+			p_score = 0
+			
+			ground = newObj("div", main.offsetHeight - 15, 0, 640, 0)
+			
+			char = newObj("div", ground.offsetTop - 90, 250, 75, 90, "url(char.png)")
+			char.r = 150
+			char.a = 0
+			char.move = 0
+			char.da = 2.5*Math.PI/180
+			char.jumped = false
+			char.shot = false
+			char.rightmov = false
+			char.leftmov = false
+			char.turn = true
+			char.style.zIndex = 1000
+			char.startY = char.offsetTop - char.offsetHeight
+			
+			char.info = function(){
+				info.innerHTML = "  b_number:"+b_number+"    b_speed:"+b_speed+"    bullets:"+bullets.childNodes.length+"    bunnies:"+bunnies.childNodes.length
+			}
+			
+			char.jump = function(move){
+				if (char.offsetLeft < (main.clientWidth - char.offsetWidth) && char.offsetLeft > 0){
+					char.style.left = parseInt(char.style.left) + move + "px"
+				}
+				char.style.top = char.startY - char.r * Math.sin(char.a + 270) + "px"
+				char.a += char.da
+				char.move++
+				if (char.offsetTop + char.offsetHeight > ground.offsetTop) {
+					clearInterval(char.j_intrv)
+					char.dead = false
+					char.style.top = ground.offsetTop - char.offsetHeight + "px"
+					char.a = 0
+					char.move = 0
+					char.jumped = false
+					if (char.turn){
+						char.style.backgroundPosition = "0 0"
+					} else{
+						char.style.backgroundPosition = "0 -90px"
+					}
+				}
+			}
+			char.right = function(){
+				if (char.offsetLeft < (main.clientWidth - char.offsetWidth)){
+						char.rightmov = true
+						char.style.left = parseInt(char.style.left) + 2 + "px"
+					} else{
+						char.style.left = main.clientWidth - char.offsetWidth + "px"
+						clearInterval(char.r_intrv)
+						char.rightmov = false
+					}
+			}
+			char.left = function(){
+				if (char.offsetLeft > 0) {
+						char.leftmov = true
+						char.style.left = parseInt(char.style.left) - 2 + "px"
+					} else{
+						char.style.left = "0px"
+						clearInterval(char.l_intrv)
+						char.leftmov = false
+					}
+			}
+			char.die = function(dir){
+				char.style.left = parseInt(char.style.left) + dir + "px"
+				char.style.top = char.startY - char.r * Math.sin(char.a + 270) + "px"
+				char.a += char.da
+				char.move++
+				if (char.offsetTop > main.offsetHeight) {
+					clearInterval(char.d_intrv)
+					char.style.left = "1000 px"
+				}
+			}
+			
+			count=1
+			
+			char.rightStep = function(){
+				if (count<3 && !char.jumped && !char.shot){
+					char.style.backgroundPosition = -75*count + "px 0"
+					count++
+				} else count=1
+			}
+			
+			char.leftStep = function(){
+				if (count<3 && !char.jumped && !char.shot){
+					char.style.backgroundPosition = -75*count + "px -90px"
+					count++
+				} else count=1
+			}
+			
+			char.shoot = function(){
+					if (char.turn) {
+						char.style.backgroundPosition = "0 0"
+					}
+					else {
+						char.style.backgroundPosition = "0 -90px"
+					}
+					clearInterval(char.shoot_int)
+					char.shot = false
+			}
+			
+			document.onkeydown = function(e){
+				e = window.event || e
+				//alert(e.keyCode)
+				if (!char.dead) {
+					//up
+					if (e.keyCode == 38 && !char.jumped && !char.shot) {
+						char.jumped = true
+						char.j_intrv = setInterval(function(){
+							char.jump(0)
+						}, 10)
+						if (char.turn) {
+							char.style.backgroundPosition = "-300px 0"
+						}
+						else {
+							char.style.backgroundPosition = "-300px -90px"
+						}
+					}
+					//right
+					if (e.keyCode == 39 && !char.rightmov && !char.leftmov) {
+						if (!char.turn) {
+							char.style.left = parseInt(char.style.left) + 38 + "px"
+						}
+						char.turn = true
+						if (!char.jumped) {
+							char.style.backgroundPosition = "0 0"
+						}
+						else {
+							char.style.backgroundPosition = "-300px 0"
+						}
+						char.r_intrv = setInterval(char.right, 10)
+						char.r_step = setInterval(char.rightStep, 50)
+					}
+					//left
+					if (e.keyCode == 37 && !char.rightmov && !char.leftmov) {
+						if (char.turn) {
+							char.style.left = parseInt(char.style.left) - 38 + "px"
+						}
+						char.turn = false
+						if (!char.jumped) {
+							char.style.backgroundPosition = "0 -90px"
+						}
+						else {
+							char.style.backgroundPosition = "-300px -90px"
+						}
+						char.l_intrv = setInterval(char.left, 10)
+						char.l_step = setInterval(char.leftStep, 50)
+					}
+					//space
+					if (e.keyCode == 32 && !char.jumped) {
+						if (!char.shot) {
+							char.shot = true
+							b1 = new bullet();
+							if (char.turn) {
+								char.style.backgroundPosition = "-225px 0"
+								b1.addDiv("#000", 5, 2, char.offsetTop + 2 + char.offsetHeight / 2, char.offsetLeft + char.offsetWidth - 5, bullets)
+							}
+							else {
+								char.style.backgroundPosition = "-225px -90px"
+								b1.addDiv("#000", 5, 2, char.offsetTop + 2 + char.offsetHeight / 2, char.offsetLeft, bullets)
+							}
+							b1.fly()
+							char.shoot_int = setInterval(char.shoot, 200)
+						}
+					}
+				}
+			}
+			document.onkeyup = function(e){
+				e = window.event || e
+				if (!char.dead){
+					if (e.keyCode == 39){//right
+						clearInterval(char.r_intrv)
+						char.rightmov = false
+						clearInterval(char.r_step)
+						if(!char.jumped){
+							char.style.backgroundPosition = "0 0"
+						}
+						count = 1
+					}
+					if (e.keyCode == 37){//left
+						clearInterval(char.l_intrv)
+						char.leftmov = false
+						clearInterval(char.l_step)
+						if(!char.jumped){
+							char.style.backgroundPosition = "0 -90px"
+						}
+						count = 1
+					}
+				}
+			}
+
+			hit_test = function(){
+				if(bullets.hasChildNodes() && bunnies.hasChildNodes()){
+					for(var i=0; i<bullets.childNodes.length; i++){
+						for(var j=0; j<bunnies.childNodes.length; j++){
+							if(bullets.childNodes[i].offsetLeft>bunnies.childNodes[j].offsetLeft && (bullets.childNodes[i].offsetLeft+bullets.childNodes[i].offsetWidth)<(bunnies.childNodes[j].offsetLeft+bunnies.childNodes[j].offsetWidth) && bunnies.childNodes[j].dead == false){
+								bullets.removeChild(bullets.childNodes[i])
+								if(bunnies.childNodes[j].b_type == "bunny"){
+									clearInterval(bunnies.childNodes[j].go)
+									bunnies.childNodes[j].dead = true
+									p_score++
+									score.innerHTML = "Score: " + p_score
+								
+									var bn = bunnies.childNodes[j]
+									function go(){
+										bn.style.top = parseInt(bn.style.top) + 1 + "px"
+										if(bn.offsetTop>main.offsetHeight){
+											clearInterval(bn.go)
+											bunnies.removeChild(bn)
+										}
+									}
+									bn.go = setInterval(go,40)
+									if(bunnies.childNodes[j].t_right){
+										bunnies.childNodes[j].style.backgroundPosition = "-240px -76px"
+									}
+									else bunnies.childNodes[j].style.backgroundPosition = "-240px 0"
+								}
+								break
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		window.onload = function(){
+			main_gen()
+			clouds_gen = setInterval(g_clouds, 6000)
+			//setInterval(char.info, 1)
+		}
+	</script>
+	</head>
+	<body>
+	</body>
+</html>
