@@ -1,2 +1,3 @@
-# hunter
-Hunter Game
+# Hunter Game
+
+Developed in 2008
